@@ -16,7 +16,8 @@ if (!function_exists('pxgc_localize_giftcard_script')) {
             'cart_url' => wc_get_cart_url(),
             'view_cart_text' => __('View cart', 'pxgc'),
             'added_text' => __('has been added to your cart,', 'pxgc'),
-            'default_product_label' => __('Gift card', 'pxgc')
+            'default_product_label' => __('Gift card', 'pxgc'),
+            'currency_symbol' => html_entity_decode(get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8')
         ]);
 
         $localized = true;

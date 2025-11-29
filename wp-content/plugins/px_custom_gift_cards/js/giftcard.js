@@ -7,6 +7,7 @@ jQuery(function ($) {
   const viewCartText = ajaxSettings.view_cart_text || "View cart";
   const addedText = ajaxSettings.added_text || "has been added to your cart,";
   const defaultProductLabel = ajaxSettings.default_product_label || "Gift card";
+  const currencySymbol = ajaxSettings.currency_symbol || "\u00A3";
 
   const clearAllNotices = () => {
     $(".pxgc_notice").removeClass("pxgc_notice--error").hide().html("");
@@ -50,9 +51,11 @@ jQuery(function ($) {
     selectedLabel = $.trim(selected.text());
 
     if (selectedPrice) {
-      $("#pxgc_price").text("??" + parseFloat(selectedPrice).toFixed(2));
+      $("#pxgc_price").text(
+        currencySymbol + parseFloat(selectedPrice).toFixed(2)
+      );
     } else {
-      $("#pxgc_price").text("??0.00");
+      $("#pxgc_price").text(currencySymbol + "0.00");
     }
 
     clearAllNotices();
