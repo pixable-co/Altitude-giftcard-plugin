@@ -91,6 +91,8 @@ function pxgc_send_giftcard_email($order_id)
 
         if (!$redeem_name) {
             $redeem_name = __('Selected Service', 'pxgc');
+        } else {
+            $redeem_name = html_entity_decode($redeem_name, ENT_QUOTES, 'UTF-8');
         }
 
         foreach ($coupon_codes as $coupon_code) {
