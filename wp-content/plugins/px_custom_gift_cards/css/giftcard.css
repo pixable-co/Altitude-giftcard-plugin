@@ -1,0 +1,152 @@
+
+/* ---------------------------------------------
+   TAB BUTTON ROW
+--------------------------------------------- */
+.pxgc-tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.pxgc-tab-btn {
+    flex: 1;
+    background: #f3f3f3;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    font-size: 16px;
+}
+
+.pxgc-tab-btn:hover {
+    background: #e9e9e9;
+}
+
+.pxgc-tab-btn.active {
+    background: var(--color-content-link-hover);
+    color: #fff;
+}
+
+/* ---------------------------------------------
+   TAB CONTENT PANELS
+--------------------------------------------- */
+.pxgc-tab-content {
+    display: none;
+    opacity: 0;
+}
+
+.pxgc-tab-content.active {
+    display: block;
+    opacity: 1;
+}
+
+
+.pxgc-tab-content p
+{
+    margin-bottom:1rem !important;
+}
+
+/* ---------------------------------------------
+   SELECT INPUTS
+--------------------------------------------- */
+.pxgc_select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.25s ease;
+}
+
+.pxgc_select:focus {
+    border-color: #111;
+    outline: none;
+}
+
+/* ---------------------------------------------
+   PRICE BOX
+--------------------------------------------- */
+#pxgc_price_wrapper {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom:1rem;
+}
+#pxgc_price {
+    font-weight: 600;
+    font-size:1.3rem;
+}
+/* ---------------------------------------------
+   MOBILE OPTIMIZATION
+--------------------------------------------- */
+@media (max-width: 600px) {
+
+    .pxgc-tab-buttons {
+        flex-direction: column;
+    }
+
+    .pxgc-tab-btn {
+        width: 100%;
+    }
+}
+
+/* Button container */
+.pxgc_add_button {
+    position: relative;
+    transition: opacity 0.25s ease;
+    overflow: hidden;
+}
+
+/* Hide text when loading */
+.pxgc_add_button.pxgc-loading {
+    color: transparent !important;   /* hides the text */
+    text-shadow: none !important;    /* prevents ghosting */
+}
+
+/* Centered spinner overlay */
+.pxgc_add_button.pxgc-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    margin-top: -11px;
+    margin-left: -11px;
+
+    border: 3px solid rgba(255,255,255,0.9);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: pxgc-spin 0.6s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes pxgc-spin {
+    to { transform: rotate(360deg); }
+}
+
+
+.loader {
+    width: 24px; /* smaller so it fits inside button */
+    height: 24px;
+    border: 4px solid #FFF;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
