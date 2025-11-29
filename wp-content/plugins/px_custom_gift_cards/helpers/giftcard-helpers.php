@@ -12,32 +12,6 @@ function pxgc_get_giftcard_product_id()
 }
 
 /**
- * Generate a gift card PDF with retries to improve reliability.
- */
-function pxgc_generate_giftcard_pdf_file($value, $redeem_name, $coupon_code, $max_attempts = 3)
-{
-    $attempt = 0;
-
-    while ($attempt < $max_attempts) {
-        $pdf_html = pxgc_generate_pdf_html($value, $redeem_name, $coupon_code);
-        $pdf_path = pxgc_generate_pdf_via_pdflayer(
-            $pdf_html,
-            "giftcard-$coupon_code"
-        );
-
-        if ($pdf_path && file_exists($pdf_path)) {
-            return $pdf_path;
-        }
-
-        $attempt++;
-        sleep(1);
-    }
-
-    error_log(sprintf('PXGC: Failed generating PDF for gift card %s after %d attempts', $coupon_code, $max_attempts));
-    return false;
-}
-
-/**
  * Send gift card email to the customer (supports multiple gift cards per order)
  */
 function pxgc_send_giftcard_email($order_id)
@@ -126,6 +100,17 @@ function pxgc_send_giftcard_email($order_id)
                 continue;
             }
 
+            // Generate PDF before sending the email so all attachments are ready.
+            $pdf_html = pxgc_generate_pdf_html($gift_value, $redeem_name, $coupon_code);
+            $pdf_path = pxgc_generate_pdf_via_pdflayer(
+                $pdf_html,
+                "giftcard-$coupon_code"
+            );
+
+            if ($pdf_path && file_exists($pdf_path)) {
+                $attachments[] = $pdf_path;
+            }
+
             $giftcards[] = [
                 'code'        => $coupon_code,
                 'redeem_name' => $redeem_name,
@@ -136,21 +121,6 @@ function pxgc_send_giftcard_email($order_id)
 
     if (empty($giftcards)) {
         return;
-    }
-
-    // Attempt to generate all PDFs (with retries) before sending email
-    $attachments = [];
-    foreach ($giftcards as $index => $giftcard) {
-        $pdf_path = pxgc_generate_giftcard_pdf_file(
-            $giftcard['value'],
-            $giftcard['redeem_name'],
-            $giftcard['code']
-        );
-
-        if ($pdf_path) {
-            $attachments[] = $pdf_path;
-            $giftcards[$index]['pdf_path'] = $pdf_path;
-        }
     }
 
     $giftcard_count = count($giftcards);

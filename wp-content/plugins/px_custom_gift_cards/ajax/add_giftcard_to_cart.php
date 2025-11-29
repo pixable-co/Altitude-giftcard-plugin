@@ -27,6 +27,24 @@ function pxgc_add_to_cart()
     }
 
     // ---------------------------------------------------------
+    // ENFORCE MAXIMUM OF 3 GIFT CARDS IN CART
+    // ---------------------------------------------------------
+    $current_qty = 0;
+    if (WC()->cart) {
+        foreach (WC()->cart->get_cart() as $cart_item) {
+            if ($cart_item['product_id'] == $giftcard_id) {
+                $current_qty += isset($cart_item['quantity']) ? intval($cart_item['quantity']) : 0;
+            }
+        }
+    }
+
+    if ($current_qty >= 3) {
+        wp_send_json_error([
+            'message' => __('You can only purchase maximum 3 gift card at 1 time.', 'pxgc')
+        ]);
+    }
+
+    // ---------------------------------------------------------
     // ADD TO CART
     // ---------------------------------------------------------
     $cart_item_key = WC()->cart->add_to_cart(
