@@ -69,9 +69,6 @@
     outline: none;
 }
 
-/* ---------------------------------------------
-   PRICE BOX
---------------------------------------------- */
 #pxgc_price_wrapper {
     background: #fafafa;
     border: 1px solid #ddd;
@@ -84,6 +81,35 @@
     font-weight: 600;
     font-size:1.3rem;
 }
+
+.pxgc_button_section {
+    margin-top: 1rem;
+}
+
+.pxgc_notice {
+    display: none;
+    margin-bottom: 0.75rem;
+    padding: 12px 15px;
+    border-radius: 6px;
+    background: #e8f6ef;
+    border: 1px solid #c8e6c9;
+    color: #1e4620;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.pxgc_notice a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.pxgc_notice.pxgc_notice--error {
+    background: #fdecea;
+    border-color: #f5c2c7;
+    color: #611a15;
+}
+
 /* ---------------------------------------------
    MOBILE OPTIMIZATION
 --------------------------------------------- */

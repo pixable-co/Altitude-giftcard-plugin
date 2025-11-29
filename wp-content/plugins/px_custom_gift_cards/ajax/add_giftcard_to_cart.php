@@ -27,11 +27,6 @@ function pxgc_add_to_cart()
     }
 
     // ---------------------------------------------------------
-    // CLEAR CART BEFORE ADDING GIFT CARD
-    // ---------------------------------------------------------
-    WC()->cart->empty_cart();
-
-    // ---------------------------------------------------------
     // ADD TO CART
     // ---------------------------------------------------------
     $cart_item_key = WC()->cart->add_to_cart(
@@ -57,8 +52,19 @@ function pxgc_add_to_cart()
         WC()->cart->cart_contents[$cart_item_key]['data']->set_price($price);
     }
 
+    $item_name = '';
+    if ($type === 'product') {
+        $product = wc_get_product($id);
+        if ($product) {
+            $item_name = $product->get_name();
+        }
+    } elseif ($type === 'consultation') {
+        $item_name = get_the_title($id);
+    }
+
     wp_send_json_success([
         'message' => 'Gift card added successfully',
-        'cart_url' => wc_get_cart_url()
+        'cart_url' => wc_get_cart_url(),
+        'item_name' => $item_name ? $item_name : __('Selected gift card', 'pxgc')
     ]);
 }

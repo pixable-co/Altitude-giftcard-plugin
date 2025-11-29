@@ -38,27 +38,31 @@ function pxgc_send_giftcard_email($order_id)
 
         $pxgc_type = $item->get_meta('_pxgc_type');
         $pxgc_id   = $item->get_meta('_pxgc_id');
-        $value     = $item->get_meta('_pxgc_price');
+        $raw_value = $item->get_meta('_pxgc_price');
 
-        if (!$pxgc_type || !$pxgc_id || !$value) {
+        if ($raw_value === '' || $raw_value === null || !$pxgc_type || !$pxgc_id) {
             continue;
         }
+
+        $gift_value = floatval($raw_value);
 
         $coupon_codes = [];
         $raw_codes = $item->get_meta('Generated Gift Card Code', false);
 
         if (!empty($raw_codes)) {
             foreach ((array) $raw_codes as $raw_code) {
+                $meta_value = null;
+
                 if ($raw_code instanceof WC_Meta_Data) {
-                    $value = $raw_code->value;
+                    $meta_value = $raw_code->value;
                 } elseif (is_array($raw_code) && isset($raw_code['value'])) {
-                    $value = $raw_code['value'];
+                    $meta_value = $raw_code['value'];
                 } else {
-                    $value = $raw_code;
+                    $meta_value = $raw_code;
                 }
 
-                if (!empty($value) && is_string($value)) {
-                    $coupon_codes[] = $value;
+                if (!empty($meta_value) && is_string($meta_value)) {
+                    $coupon_codes[] = $meta_value;
                 }
             }
         }
@@ -95,7 +99,7 @@ function pxgc_send_giftcard_email($order_id)
             }
 
             // Generate PDF before sending the email so all attachments are ready.
-            $pdf_html = pxgc_generate_pdf_html($value, $redeem_name, $coupon_code);
+            $pdf_html = pxgc_generate_pdf_html($gift_value, $redeem_name, $coupon_code);
             $pdf_path = pxgc_generate_pdf_via_pdflayer(
                 $pdf_html,
                 "giftcard-$coupon_code"
@@ -108,7 +112,7 @@ function pxgc_send_giftcard_email($order_id)
             $giftcards[] = [
                 'code'        => $coupon_code,
                 'redeem_name' => $redeem_name,
-                'value'       => $value,
+                'value'       => $gift_value,
             ];
         }
     }
