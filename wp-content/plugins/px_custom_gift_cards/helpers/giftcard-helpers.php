@@ -36,12 +36,23 @@ function pxgc_send_giftcard_email($order_id)
             continue;
         }
 
-        $coupon_code = $item->get_meta('Generated Gift Card Code');
-        $pxgc_type   = $item->get_meta('_pxgc_type');
-        $pxgc_id     = $item->get_meta('_pxgc_id');
-        $value       = $item->get_meta('_pxgc_price');
+        $pxgc_type = $item->get_meta('_pxgc_type');
+        $pxgc_id   = $item->get_meta('_pxgc_id');
+        $value     = $item->get_meta('_pxgc_price');
 
-        if (!$coupon_code || !$pxgc_type || !$pxgc_id || !$value) {
+        if (!$pxgc_type || !$pxgc_id || !$value) {
+            continue;
+        }
+
+        $coupon_codes = $item->get_meta('Generated Gift Card Code', false);
+        if (empty($coupon_codes)) {
+            $single_code = $item->get_meta('Generated Gift Card Code');
+            if ($single_code) {
+                $coupon_codes = [$single_code];
+            }
+        }
+
+        if (empty($coupon_codes)) {
             continue;
         }
 
@@ -60,22 +71,28 @@ function pxgc_send_giftcard_email($order_id)
             $redeem_name = __('Selected Service', 'pxgc');
         }
 
-        // Generate PDF before sending the email so all attachments are ready.
-        $pdf_html = pxgc_generate_pdf_html($value, $redeem_name, $coupon_code);
-        $pdf_path = pxgc_generate_pdf_via_pdflayer(
-            $pdf_html,
-            "giftcard-$coupon_code"
-        );
+        foreach ($coupon_codes as $coupon_code) {
+            if (!$coupon_code) {
+                continue;
+            }
 
-        if ($pdf_path && file_exists($pdf_path)) {
-            $attachments[] = $pdf_path;
+            // Generate PDF before sending the email so all attachments are ready.
+            $pdf_html = pxgc_generate_pdf_html($value, $redeem_name, $coupon_code);
+            $pdf_path = pxgc_generate_pdf_via_pdflayer(
+                $pdf_html,
+                "giftcard-$coupon_code"
+            );
+
+            if ($pdf_path && file_exists($pdf_path)) {
+                $attachments[] = $pdf_path;
+            }
+
+            $giftcards[] = [
+                'code'        => $coupon_code,
+                'redeem_name' => $redeem_name,
+                'value'       => $value,
+            ];
         }
-
-        $giftcards[] = [
-            'code'        => $coupon_code,
-            'redeem_name' => $redeem_name,
-            'value'       => $value,
-        ];
     }
 
     if (empty($giftcards)) {

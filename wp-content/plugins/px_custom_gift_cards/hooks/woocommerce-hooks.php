@@ -36,56 +36,70 @@ function pxgc_generate_coupons_from_order($order_id)
             continue;
         }
 
-        // Generate a unique coupon code
-        $coupon_code = strtoupper('GC-' . $order_id . '-' . wp_generate_password(6, false, false));
+        $quantity = max(1, (int) $item->get_quantity());
+        $line_codes = [];
 
-        // Create coupon
-        $coupon_id = wp_insert_post([
-            'post_title' => $coupon_code,
-            'post_content' => 'Automatically generated gift card coupon.',
-            'post_status' => 'publish',
-            'post_author' => 1,
-            'post_type' => 'shop_coupon'
-        ]);
+        for ($i = 0; $i < $quantity; $i++) {
 
-        if (!$coupon_id) {
+            // Generate a unique coupon code for each gift card purchased
+            $coupon_code = strtoupper('GC-' . $order_id . '-' . wp_generate_password(6, false, false));
+
+            // Create coupon
+            $coupon_id = wp_insert_post([
+                'post_title' => $coupon_code,
+                'post_content' => 'Automatically generated gift card coupon.',
+                'post_status' => 'publish',
+                'post_author' => 1,
+                'post_type' => 'shop_coupon'
+            ]);
+
+            if (!$coupon_id) {
+                continue;
+            }
+
+            // Set coupon core properties
+            update_post_meta($coupon_id, 'discount_type', 'fixed_cart');
+            update_post_meta($coupon_id, 'coupon_amount', $value);
+            update_post_meta($coupon_id, 'usage_limit', 1);
+            update_post_meta($coupon_id, 'individual_use', 'yes');
+            update_post_meta($coupon_id, 'free_shipping', 'no');
+
+            /**
+             * -----------------------------------------------------------
+             * RESTRICTION LOGIC BY TYPE
+             * -----------------------------------------------------------
+             */
+
+            if ($type === 'product') {
+
+                // NORMAL PRODUCT - restrict only to this product ID
+                update_post_meta($coupon_id, 'product_ids', $id);
+            }
+
+            if ($type === 'consultation') {
+
+                // CONSULTATION - always restrict to product **18472**
+                update_post_meta($coupon_id, 'product_ids', 18472);
+
+                // Also record the consultation post ID into ACF field "consultation"
+                update_field('consultation', $id, $coupon_id);
+                update_field('order_id', $order_id, $coupon_id);
+            }
+
+            $line_codes[] = $coupon_code;
+            $generated[] = $coupon_code;
+        }
+
+        if (empty($line_codes)) {
             continue;
         }
 
-        // Set coupon core properties
-        update_post_meta($coupon_id, 'discount_type', 'fixed_cart');
-        update_post_meta($coupon_id, 'coupon_amount', $value);
-        update_post_meta($coupon_id, 'usage_limit', 1);
-        update_post_meta($coupon_id, 'individual_use', 'yes');
-        update_post_meta($coupon_id, 'free_shipping', 'no');
-
-        /**
-         * -----------------------------------------------------------
-         * RESTRICTION LOGIC BY TYPE
-         * -----------------------------------------------------------
-         */
-
-        if ($type === 'product') {
-
-            // NORMAL PRODUCT → restrict only to this product ID
-            update_post_meta($coupon_id, 'product_ids', $id);
+        // Store coupon codes on order item (visible in admin)
+        $item->delete_meta_data('Generated Gift Card Code');
+        foreach ($line_codes as $coupon_code) {
+            $item->add_meta_data('Generated Gift Card Code', $coupon_code, false);
         }
-
-        if ($type === 'consultation') {
-
-            // CONSULTATION → always restrict to product **18472**
-            update_post_meta($coupon_id, 'product_ids', 18472);
-
-            // Also record the consultation post ID into ACF field "consultation"
-            update_field('consultation', $id, $coupon_id); // stores the post ID
-            update_field("order_id", $order_id, $coupon_id); // stores the order ID
-        }
-
-        // Store coupon code on order item (visible in admin)
-        $item->add_meta_data('Generated Gift Card Code', $coupon_code, true);
         $item->save();
-
-        $generated[] = $coupon_code;
     }
 
     if (!empty($generated)) {
