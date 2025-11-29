@@ -44,10 +44,28 @@ function pxgc_send_giftcard_email($order_id)
             continue;
         }
 
-        $coupon_codes = $item->get_meta('Generated Gift Card Code', false);
+        $coupon_codes = [];
+        $raw_codes = $item->get_meta('Generated Gift Card Code', false);
+
+        if (!empty($raw_codes)) {
+            foreach ((array) $raw_codes as $raw_code) {
+                if ($raw_code instanceof WC_Meta_Data) {
+                    $value = $raw_code->value;
+                } elseif (is_array($raw_code) && isset($raw_code['value'])) {
+                    $value = $raw_code['value'];
+                } else {
+                    $value = $raw_code;
+                }
+
+                if (!empty($value) && is_string($value)) {
+                    $coupon_codes[] = $value;
+                }
+            }
+        }
+
         if (empty($coupon_codes)) {
             $single_code = $item->get_meta('Generated Gift Card Code');
-            if ($single_code) {
+            if (!empty($single_code) && is_string($single_code)) {
                 $coupon_codes = [$single_code];
             }
         }
