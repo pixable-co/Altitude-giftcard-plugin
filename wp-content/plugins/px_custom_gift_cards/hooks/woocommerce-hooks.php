@@ -88,6 +88,14 @@ function pxgc_generate_coupons_from_order($order_id)
         $generated[] = $coupon_code;
     }
 
+    if (!empty($generated)) {
+        update_post_meta($order_id, '_pxgc_generated_codes', $generated);
+        update_post_meta($order_id, 'Gift Card Codes', implode(', ', $generated));
+    } else {
+        delete_post_meta($order_id, '_pxgc_generated_codes');
+        delete_post_meta($order_id, 'Gift Card Codes');
+    }
+
     return $generated;
 }
 
